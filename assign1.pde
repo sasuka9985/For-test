@@ -1,52 +1,127 @@
-/* please implement your assign1 code in this file. */
-PImage bg1;
-PImage bg2;
-PImage fighter;
-PImage hp;
-PImage treasure;
-PImage enemy;
+/*
+Pong Game
+*/
 
-int x; // background moving
-int HP;
-int tX,tY; // treasure position
-int eX; // enemy position
+float ballX, ballY;
+float ballSize;
+float centerX, centerY;
+float paddleW, paddleH;
+float rightPaddleX, rightPaddleY;
+float leftPaddleX, leftPaddleY;
+float speedX, speedY;
 
-void setup () {
-  size(640,480) ;  // must use this size.
-  // your code
-  bg1=loadImage("img/bg1.png");
-  bg2=loadImage("img/bg2.png");
-  fighter=loadImage("img/fighter.png");
-  hp=loadImage("img/hp.png");
-  treasure=loadImage("img/treasure.png");
-  enemy=loadImage("img/enemy.png");
+boolean isPlaying= false;
+
+//score
+final int TOTAL_LIFE=3;
+int score;
+int life;
+
+void setup(){
+  size(320,200);
+  background(255);
   
-  HP=floor(random(8,201));
-  tX=floor(random(0,600));
-  tY=floor(random(0,440));
+  centerX=width/2;
+  centerY=height/2;
+  ballX=centerX;
+  ballY=centerY;
+  ballSize=15;
+  speedX=random(5,10);
+  speedY=random(-5,5);
+  paddleW=10;
+  paddleH=50;
+  rightPaddleX=width-paddleW*2;
+  rightPaddleY=centerY-paddleH/2;
+  leftPaddleX=paddleW;
+  leftPaddleY=centerY-paddleH/2;
+  score=0;
+  life=TOTAL_LIFE;
+  
+  //middle line
+  stroke(128);
+  line(centerX,0,centerX,height);
+  
+  //ball
+  noStroke();
+  fill(255,0,0);
+  ellipse(centerX,centerY,ballSize,ballSize);
+  
+  //paddles
+  fill(0,0,255);
+  rect(rightPaddleX,rightPaddleY,paddleW,paddleH);
+  rect(leftPaddleX,leftPaddleY,paddleW,paddleH);
+  
+  textSize(18);  
+  fill(0);
+  text("Press Any Key to Start",65,centerY);
+  textSize(32);
+  text("score:0",25,30);
+  text("life:3",centerX+40,30);
+
 }
 
-void draw() {
-  // your code
-  
-  //background
-  x++;x%=1280;
-  image(bg1,x,0);
-  image(bg2,-640+x,0);
-  image(bg1,-1280+x,0);
-  
-  //treasure
-  image(treasure,tX,tY);
-  
-  //fighter
-  image(fighter,570,215);
-  
-  //hp
-  fill(255,0,0);
-  rect(16,11,HP,20);  //8~200
-  image(hp,10,10);
+void draw(){
+  if(isPlaying){
+    background(255);
+    fill(0);
+    text("score:"+score,25,30);
+    text("life:"+life,centerX+40,30);
+    
+    //middle line
+    stroke(128);
+    line(centerX,0,centerX,height);
+    
+    //------------ball
+    //move
+    ballX+=speedX;
+    ballY+=speedY;
+    //boundary dectecion
+    if(ballX<leftPaddleX+paddleW){
+      speedX*=-1;
+    }
+    if(ballY<0||ballY>height){
+      speedY*=-1;
+    }
+    //hit dectection
+    if(ballX>=rightPaddleX){
+      if(ballY>=rightPaddleY&&ballY<=rightPaddleY+paddleH){
+        speedX*=-1;
+        score+=10;
 
-  //enemy
-  eX+=3; eX%=640;
-  image(enemy,eX,300);
+      }else{
+        isPlaying=false;
+        life--;
+        if(life<=0){
+          text("YOUSUCK",centerX-80,centerY);
+
+        }
+      }
+    }
+    //draw
+    noStroke();
+    fill(255,0,0);
+    ellipse(ballX,ballY,ballSize,ballSize);
+    //-------------ball
+    
+    //paddles
+    fill(0,0,255);
+    //right
+    rightPaddleY=mouseY-paddleH/2;
+    rect(rightPaddleX,rightPaddleY,paddleW,paddleH);
+    rect(leftPaddleX,leftPaddleY,paddleW,paddleH);
+    //left
+    leftPaddleY=ballY-paddleH/2;
+    rect(leftPaddleX,leftPaddleY,paddleW,paddleH);
+  }
+
+}
+
+void keyPressed(){
+  isPlaying=true;
+  
+  //restart
+  ballX=centerX;
+  ballY=centerY;
+  speedX=random(1,5);
+  speedY=random(-5,5);
 }
